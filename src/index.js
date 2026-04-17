@@ -95,15 +95,32 @@ async function main() {
     },
   });
 
+  let lastEvent = 'booting Chromium + carregando WhatsApp Web';
+  const tBoot = Date.now();
+  const heartbeat = setInterval(() => {
+    const secs = Math.round((Date.now() - tBoot) / 1000);
+    log('heartbeat', `${secs}s decorridos — aguardando: ${lastEvent}`);
+  }, 5000);
+
   client.on('qr', (qr) => {
+    lastEvent = 'usuário escaneando QR';
     log('qr', 'QR recebido — escaneie no WhatsApp (Configurações → Aparelhos conectados):');
     qrcode.generate(qr, { small: true });
   });
 
-  client.on('loading_screen', (pct, msg) => log('loading', `${pct}% ${msg ?? ''}`));
-  client.on('authenticated', () => log('auth', 'autenticado, sincronizando chats (pode demorar 30-90s na primeira vez)...'));
+  client.on('loading_screen', (pct, msg) => {
+    lastEvent = `loading_screen ${pct}%`;
+    log('loading', `${pct}% ${msg ?? ''}`);
+  });
+  client.on('authenticated', () => {
+    lastEvent = 'autenticado, sincronizando chats';
+    log('auth', 'autenticado, sincronizando chats (pode demorar 30-90s na primeira vez)...');
+  });
   client.on('auth_failure', (m) => err('auth_failure', m));
-  client.on('change_state', (s) => log('state', s));
+  client.on('change_state', (s) => {
+    lastEvent = `state=${s}`;
+    log('state', s);
+  });
   client.on('disconnected', (r) => log('disconnected', r));
 
   const readyTimer = setTimeout(() => {
@@ -111,8 +128,9 @@ async function main() {
   }, 120000);
 
   client.on('ready', async () => {
+    clearInterval(heartbeat);
     clearTimeout(readyTimer);
-    log('ready', 'cliente pronto.');
+    log('ready', `cliente pronto em ${Math.round((Date.now() - tBoot) / 1000)}s.`);
 
     log('chats', 'carregando lista de chats...');
     const t0 = Date.now();
@@ -172,10 +190,11 @@ async function main() {
     process.exit(0);
   });
 
-  log('init', 'inicializando cliente (abrindo Chromium headless)...');
+  log('init', 'inicializando cliente (Chromium headless + WhatsApp Web)...');
+  log('init', 'isso pode levar 15-60s na primeira conexão (depende da rede e sync). Heartbeat a cada 5s enquanto aguarda.');
   const tInit = Date.now();
   await client.initialize();
-  log('init', `client.initialize() retornou em ${Date.now() - tInit}ms`);
+  log('init', `client.initialize() retornou em ${Math.round((Date.now() - tInit) / 1000)}s`);
 }
 
 main().catch((e) => {
