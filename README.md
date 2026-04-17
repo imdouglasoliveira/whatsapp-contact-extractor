@@ -26,7 +26,7 @@ Fluxo:
 1. Primeira vez: aparece QR code — escaneie (WhatsApp → Configurações → Aparelhos conectados → Conectar aparelho).
 2. Após sync (30-90s na primeira vez), os grupos aparecem numa lista.
 3. Use ↑↓ pra navegar, **espaço** pra marcar, **enter** pra confirmar.
-4. Contatos salvos em `output/<slug-grupo>-AAAA-MM-DD.csv`.
+4. Contatos salvos em `output/DD-MM-AAAA/<slug-grupo>.csv`.
 
 Nas próximas execuções o QR não aparece — sessão fica em `.wwebjs_auth/`.
 

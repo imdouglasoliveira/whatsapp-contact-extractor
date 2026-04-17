@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import pkg from 'whatsapp-web.js';
 import qrcode from 'qrcode-terminal';
 import { checkbox } from '@inquirer/prompts';
-import { buildTag, todayStamp, toCsv } from './utils.js';
+import { buildTag, slugify, todayFolder, todayStamp, toCsv } from './utils.js';
 
 const { Client, LocalAuth } = pkg;
 
@@ -70,9 +70,10 @@ async function extractGroup(client, chat) {
   return { tag, rows, ok, fail };
 }
 
-function writeCsv(tag, rows) {
-  if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
-  const csvPath = path.join(OUTPUT_DIR, `${tag}.csv`);
+function writeCsv(groupName, rows) {
+  const folder = path.join(OUTPUT_DIR, todayFolder());
+  if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
+  const csvPath = path.join(folder, `${slugify(groupName)}.csv`);
   fs.writeFileSync(csvPath, toCsv(rows), 'utf8');
   log('csv', `${rows.length} linhas → ${path.relative(ROOT, csvPath)}`);
 }
@@ -157,7 +158,7 @@ async function main() {
       const t = Date.now();
       try {
         const result = await extractGroup(client, chat);
-        writeCsv(result.tag, result.rows);
+        writeCsv(chat.name, result.rows);
         totalOk += result.ok;
         totalFail += result.fail;
         log('extract', `concluído em ${Date.now() - t}ms`);
