@@ -1,0 +1,19 @@
+{
+  "name": "whatsapp-contact-extractor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Extrai contatos de grupos de WhatsApp via whatsapp-web.js",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "list-groups": "node src/list-groups.js"
+  },
+  "dependencies": {
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.26.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
