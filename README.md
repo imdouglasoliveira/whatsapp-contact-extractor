@@ -1,53 +1,41 @@
 # whatsapp-contact-extractor
 
-Extrai contatos de grupos de WhatsApp via [whatsapp-web.js](https://wwebjs.dev) e salva em CSV/JSON com tag no formato `nome-grupo-AAAA-MM-DD`.
+Extrai contatos de grupos de WhatsApp via [whatsapp-web.js](https://wwebjs.dev). Saída em CSV com tag no formato `nome-grupo-AAAA-MM-DD`.
 
 ## Stack
 
 - Node.js 18+
 - whatsapp-web.js (Puppeteer + WhatsApp Web)
+- `@inquirer/prompts` — seleção interativa de grupos no terminal
 - LocalAuth — sessão persistida em `.wwebjs_auth/` (QR só na primeira vez)
 
 ## Setup
 
 ```bash
-pnpm install   # ou npm install
+pnpm install
 ```
 
 ## Uso
-
-### 1. Descobrir os nomes exatos dos grupos
-
-```bash
-pnpm list-groups
-```
-
-Escaneie o QR (WhatsApp → Configurações → Aparelhos conectados → Conectar aparelho). Os grupos aparecem no terminal.
-
-### 2. Configurar os grupos alvo
-
-Edite [config/groups.json](config/groups.json) com os nomes **exatos** dos grupos:
-
-```json
-{
-  "groups": ["Meu Grupo", "Outro Grupo"]
-}
-```
-
-### 3. Extrair
 
 ```bash
 pnpm start
 ```
 
-Saída em `output/`:
-- `<slug-grupo>-AAAA-MM-DD.csv`
-- `<slug-grupo>-AAAA-MM-DD.json`
+Fluxo:
 
-Cada linha/registro inclui a `tag` (`nome-grupo-AAAA-MM-DD` tudo minúsculo), número, nome, pushname e flags de admin.
+1. Primeira vez: aparece QR code — escaneie (WhatsApp → Configurações → Aparelhos conectados → Conectar aparelho).
+2. Após sync (30-90s na primeira vez), os grupos aparecem numa lista.
+3. Use ↑↓ pra navegar, **espaço** pra marcar, **enter** pra confirmar.
+4. Contatos salvos em `output/<slug-grupo>-AAAA-MM-DD.csv`.
+
+Nas próximas execuções o QR não aparece — sessão fica em `.wwebjs_auth/`.
+
+## Formato do CSV
+
+Colunas: `tag`, `grupo`, `data_extracao`, `numero`, `jid`, `nome`, `pushname`, `is_admin`, `is_super_admin`.
 
 ## Notas
 
 - `output/`, `.wwebjs_auth/` e `.wwebjs_cache/` são gitignored.
-- Uso é não-oficial (viola ToS do WhatsApp se usado em escala). Para um grupo próprio/pontual, risco é baixo.
-- Se a sessão expirar, apague `.wwebjs_auth/` e reescaneie o QR.
+- Uso é não-oficial (viola ToS do WhatsApp se usado em escala). Para grupos próprios/pontuais, risco é baixo.
+- Se a sessão expirar ou der erro de versão, apague `.wwebjs_auth/` e reescaneie.
