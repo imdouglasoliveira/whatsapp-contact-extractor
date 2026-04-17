@@ -77,6 +77,10 @@ async function main() {
   const client = new Client({
     authStrategy: new LocalAuth({ dataPath: path.join(ROOT, '.wwebjs_auth') }),
     puppeteer: { headless: true, args: ['--no-sandbox'] },
+    webVersionCache: {
+      type: 'remote',
+      remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1027014171-alpha.html',
+    },
   });
 
   client.on('qr', (qr) => {
@@ -84,8 +88,11 @@ async function main() {
     qrcode.generate(qr, { small: true });
   });
 
-  client.on('authenticated', () => console.log('Autenticado.'));
-  client.on('auth_failure', (m) => console.error('Falha de autenticação:', m));
+  client.on('loading_screen', (pct, msg) => console.log(`[loading] ${pct}% ${msg}`));
+  client.on('authenticated', () => console.log('[auth] autenticado, sincronizando (pode demorar 30-90s)...'));
+  client.on('auth_failure', (m) => console.error('[auth_failure]', m));
+  client.on('change_state', (s) => console.log(`[state] ${s}`));
+  client.on('disconnected', (r) => console.log(`[disconnected] ${r}`));
 
   client.on('ready', async () => {
     console.log('Cliente pronto. Extraindo grupos...\n');
